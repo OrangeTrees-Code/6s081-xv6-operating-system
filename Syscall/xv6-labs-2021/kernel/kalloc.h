@@ -1,0 +1,1 @@
+int getNumOfFreeMemory(void);
