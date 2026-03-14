@@ -1,0 +1,67 @@
+riscv64-linux-gnu-ld: warning: user/_echo has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_forktest has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_grep has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_init has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_kill has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_ln has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_ls has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_mkdir has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_rm has a LOAD segment with RWX permissions
+user/sh.c: In function ‘runcmd’:
+user/sh.c:58:1: warning: infinite recursion detected [-Winfinite-recursion]
+   58 | runcmd(struct cmd *cmd)
+      | ^~~~~~
+user/sh.c:89:5: note: recursive call
+   89 |     runcmd(rcmd->cmd);
+      |     ^~~~~~~~~~~~~~~~~
+user/sh.c:109:7: note: recursive call
+  109 |       runcmd(pcmd->left);
+      |       ^~~~~~~~~~~~~~~~~~
+user/sh.c:116:7: note: recursive call
+  116 |       runcmd(pcmd->right);
+      |       ^~~~~~~~~~~~~~~~~~~
+user/sh.c:95:7: note: recursive call
+   95 |       runcmd(lcmd->left);
+      |       ^~~~~~~~~~~~~~~~~~
+user/sh.c:97:5: note: recursive call
+   97 |     runcmd(lcmd->right);
+      |     ^~~~~~~~~~~~~~~~~~~
+user/sh.c:127:7: note: recursive call
+  127 |       runcmd(bcmd->cmd);
+      |       ^~~~~~~~~~~~~~~~~
+riscv64-linux-gnu-ld: warning: user/_sh has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_stressfs has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_usertests has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_grind has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_wc has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_zombie has a LOAD segment with RWX permissions
+riscv64-linux-gnu-ld: warning: user/_pgtbltest has a LOAD segment with RWX permissions
+nmeta 46 (boot, super, log blocks 30 inode blocks 13, bitmap blocks 1) blocks 954 total 1000
+balloc: first 560 blocks have been allocated
+balloc: write bitmap block at sector 45
+*** Now run 'gdb' in another window.
+
+xv6 kernel is booting
+
+hart 2 starting
+hart 1 starting
+page table 0x0000000087f6e000
+ ..0: pte 0x0000000021fda801 pa 0x0000000087f6e000
+ .. ..0: pte 0x0000000021fda401 pa 0x0000000087f6a000
+ .. .. ..0: pte 0x0000000021fdac1f pa 0x0000000087f69000
+ .. .. ..1: pte 0x0000000021fda00f pa 0x0000000087f69000
+ .. .. ..2: pte 0x0000000021fd9c1f pa 0x0000000087f69000
+ ..255: pte 0x0000000021fdb401 pa 0x0000000087f6e000
+ .. ..511: pte 0x0000000021fdb001 pa 0x0000000087f6d000
+ .. .. ..509: pte 0x0000000021fdd813 pa 0x0000000087f6c000
+ .. .. ..510: pte 0x0000000021fddc07 pa 0x0000000087f6c000
+ .. .. ..511: pte 0x0000000020001c0b pa 0x0000000087f6c000
+init: starting sh
+$ pgtbltest
+ugetpid_test starting
+ugetpid_test: OK
+pgaccess_test starting
+scause 0x000000000000000f
+sepc=0x0000000080002112 stval=0x0000000000000000
+panic: kerneltrap
+qemu-system-riscv64: terminating on signal 2

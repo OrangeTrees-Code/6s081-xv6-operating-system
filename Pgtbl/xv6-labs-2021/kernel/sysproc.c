@@ -1,0 +1,167 @@
+#include "types.h"
+#include "riscv.h"
+#include "param.h"
+#include "defs.h"
+#include "date.h"
+#include "memlayout.h"
+#include "spinlock.h"
+#include "proc.h"
+
+uint64
+sys_exit(void) {
+    int n;
+    if (argint(0, &n) < 0)
+        return -1;
+    exit(n);
+    return 0;  // not reached
+}
+
+uint64
+sys_getpid(void) {
+    return myproc()->pid;
+}
+
+uint64
+sys_fork(void) {
+    return fork();
+}
+
+uint64
+sys_wait(void) {
+    uint64 p;
+    if (argaddr(0, &p) < 0)
+        return -1;
+    return wait(p);
+}
+
+uint64
+sys_sbrk(void) {
+    int addr;
+    int n;
+
+    if (argint(0, &n) < 0)
+        return -1;
+
+    addr = myproc()->sz;
+    if (growproc(n) < 0)
+        return -1;
+    return addr;
+}
+
+uint64
+sys_sleep(void) {
+    int n;
+    uint ticks0;
+
+
+    if (argint(0, &n) < 0)
+        return -1;
+    acquire(&tickslock);
+    ticks0 = ticks;
+    while (ticks - ticks0 < n) {
+        if (myproc()->killed) {
+            release(&tickslock);
+            return -1;
+        }
+        sleep(&ticks, &tickslock);
+    }
+    release(&tickslock);
+    return 0;
+}
+
+
+// #ifdef LAB_PGTBL
+int
+sys_pgaccess(void) {
+    int len;
+    uint64 base, mask;
+    if (argint(1, &len) < 0) {
+        return -1;
+    }
+    if (len > 64) {
+        return -1;
+    }
+    if (argaddr(0, &base) < 0) {
+        return -1;
+    }
+    if (argaddr(2, &mask) < 0) {
+        return -1;
+    }
+
+    pagetable_t pagetable = myproc()->pagetable;
+
+    uint64 va;
+    pte_t* pte;
+    uint64 bitmap = 0;
+    for (int i = 0;i < len;i++) {
+        va = (uint64)base + PGSIZE * i;
+        pte = walk(pagetable, va, 0);
+        if (pte&&(*pte & PTE_A)) {
+            bitmap |= (1ULL<< i);
+            *pte &= ~PTE_A;
+            sfence_vma();
+        }
+    }
+
+    if (copyout(pagetable, (uint64)mask, (char*)&bitmap, sizeof(bitmap)) < 0) {
+        return -1;
+    }
+
+
+    return 0;
+}
+// #endif
+
+uint64
+sys_kill(void) {
+    int pid;
+
+    if (argint(0, &pid) < 0)
+        return -1;
+    return kill(pid);
+}
+
+// return how many clock tick interrupts have occurred
+// since start.
+uint64
+sys_uptime(void) {
+    uint xticks;
+
+    acquire(&tickslock);
+    xticks = ticks;
+    release(&tickslock);
+    return xticks;
+}
+
+uint64
+sys_rpdirty(void) {
+    uint64 pagetable;
+
+    if (argaddr(0, &pagetable) < 0) {
+        return -1;
+    }
+
+    printf("dirty page %p\n", (pagetable_t)pagetable);
+    traversal((pagetable_t)pagetable, 1);
+}
+
+void traversal(pagetable_t pagetable, int depth) {
+    for (int i = 0;i < 512;i++) {
+        if (pagetable[i] & PTE_V) {
+            if (depth == 3) {
+                if ((pagetable[i] & PTE_V) && (pagetable[i] & PTE_D)) {
+                    printf(" .. .. ..");
+                    printf("%d pte %p pa %p [dirty]\n", i, pagetable[i], pagetable + i);
+                }
+                continue;
+            }
+            else {
+                for (int i = 0;i < depth;i++) {
+                    printf(" ..");
+                }
+                printf("%d pte %p pa %p\n", i, pagetable[i], pagetable + i);
+                traversal(PTE2PA(pagetable[i]), depth + 1);
+            }
+        }
+    }
+}
